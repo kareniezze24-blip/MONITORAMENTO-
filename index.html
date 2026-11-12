@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Controle de rompimentos</title>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('rompimentos-theme')||'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
+<style>
+:root{--bg:#f3f5f7;--sf:#fff;--tx:#14202b;--mu:#5b6b7a;--ln:#d9e0e6;--ac:#0a5c8f;--acx:#fff;--red:#b42318;--redb:#fde8e6;--amb:#9a5b00;--ambb:#fff1d6;--grn:#14693d;--grnb:#dff3e6;--blu:#0a5c8f;--blub:#e1eefa;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f161d;--sf:#18222c;--tx:#e8eef3;--mu:#93a3b2;--ln:#2b3946;--ac:#5db4ea;--acx:#07151f;--red:#ff8a80;--redb:#3a1a18;--amb:#ffc266;--ambb:#352610;--grn:#6fd69a;--grnb:#12301f;--blu:#5db4ea;--blub:#112c40}}
+:root[data-theme="dark"]{--bg:#0f161d;--sf:#18222c;--tx:#e8eef3;--mu:#93a3b2;--ln:#2b3946;--ac:#5db4ea;--acx:#07151f;--red:#ff8a80;--redb:#3a1a18;--amb:#ffc266;--ambb:#352610;--grn:#6fd69a;--grnb:#12301f;--blu:#5db4ea;--blub:#112c40}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+header{background:var(--sf);border-top:4px solid var(--ac);border-bottom:1px solid var(--ln);padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+h1{font-size:17px;margin:0}.sub{color:var(--mu);font-size:13px}
+select,input,textarea,button{font:inherit;color:var(--tx)}
+select,input,textarea{background:var(--sf);border:1px solid var(--ln);border-radius:6px;padding:7px 9px;width:100%}
+.shell{display:flex}.content{flex:1;min-width:0}
+nav{display:flex;flex-direction:column;gap:4px;padding:12px 8px;width:210px;flex:none;background:var(--sf);border-right:1px solid var(--ln)}
+nav button{background:none;border:0;border-left:4px solid transparent;border-radius:6px;padding:10px 12px;cursor:pointer;color:var(--mu);text-align:left;font-weight:600}
+nav button[aria-current="true"]{color:var(--ac);border-color:var(--ac);background:var(--blub)}
+main,#bn{max-width:1000px;margin:0 auto;padding:16px}#bn{padding-bottom:0}
+main h2{font-size:16px;margin:18px 0 8px}.panel h2{margin-top:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--sf);border:1px solid var(--ln);border-radius:8px;padding:12px}
+.kpi b{display:block;font-size:30px;line-height:1.1}.kpi span{color:var(--mu);font-size:13px}.kpi.r b{color:var(--red)}
+.item{background:var(--sf);border:1px solid var(--ln);border-left:6px solid var(--grn);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;cursor:pointer;text-align:left;width:100%}
+.item.r{border-left-color:var(--red)}.item.a{border-left-color:var(--amb)}
+.item:hover,.item:focus-visible,.rk:hover{outline:2px solid var(--ac)}
+.item .t{font-weight:700}.item .m{color:var(--mu);font-size:13px;grid-column:1/-1}
+.age{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}.r .age{color:var(--red)}.a .age{color:var(--amb)}
+.tag{display:inline-block;border-radius:99px;padding:1px 9px;font-size:12px;font-weight:600;background:var(--blub);color:var(--blu)}
+.tag.Encerrado{background:var(--grnb);color:var(--grn)}.tag.Aguardando{background:var(--ambb);color:var(--amb)}
+.tag.k{background:var(--ln);color:var(--tx)}.tag.ok{background:var(--grnb);color:var(--grn)}.tag.ext,.tag.wt{background:var(--ambb);color:var(--amb)}.tag.late{background:var(--redb);color:var(--red)}.lt{color:var(--red)}
+.panel{background:var(--sf);border:1px solid var(--ln);border-radius:8px;padding:14px;margin-bottom:14px}
+.okbox{background:var(--grnb);color:var(--grn);border-radius:6px;padding:8px 10px}
+.btn{background:var(--ac);color:var(--acx);border:0;border-radius:6px;padding:8px 14px;font-weight:700;cursor:pointer}.btn.s{background:none;color:var(--ac);border:1px solid var(--ac)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+label{display:block;font-size:13px;color:var(--mu);margin-bottom:3px}
+.tl{border-left:2px solid var(--ln);margin:12px 0 0 6px;padding-left:14px}.tl div{margin-bottom:10px;position:relative}
+.tl div:before{content:"";position:absolute;left:-21px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--ac)}.tl small{color:var(--mu)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;align-items:start}
+.empty{color:var(--mu);padding:12px;text-align:center}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.row>*{flex:1;min-width:130px}
+.note{font-size:12px;color:var(--mu)}
+.alert{background:var(--redb);color:var(--red);border:1px solid var(--red);border-radius:8px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.alert.ok{background:var(--grnb);color:var(--grn);border-color:var(--grn)}
+.chip{background:var(--sf);color:var(--tx);border:1px solid var(--ln);border-radius:99px;padding:3px 10px;cursor:pointer;font-size:13px}.chip.n{border-style:dashed}
+.bars{display:flex;gap:5px;align-items:flex-end;height:120px}
+.bc{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}.bc small{color:var(--mu);font-size:11px}
+.bc .b{width:100%;background:var(--ac);border-radius:3px 3px 0 0;min-height:2px}
+.rk{display:grid;grid-template-columns:minmax(0,1.6fr) 1fr auto auto;gap:8px;align-items:center;width:100%;text-align:left;background:var(--sf);border:1px solid var(--ln);border-radius:6px;padding:6px 10px;margin-bottom:6px;cursor:pointer}
+.rk .nm{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar{background:var(--ln);height:8px;border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ac)}
+@media (max-width:700px){.shell{flex-direction:column}nav{width:100%;flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--ln);padding:6px 8px}nav button{border-left:0;border-bottom:3px solid transparent;white-space:nowrap}nav button[aria-current="true"]{border-color:var(--ac)}}
+.mt{font:12px sans-serif;fill:var(--tx)}.map{width:100%;height:auto;background:var(--sf);border:1px solid var(--ln);border-radius:8px}
+.lg{display:flex;gap:6px 14px;flex-wrap:wrap;margin:10px 0;font-size:13px}.lg i{display:inline-block;width:22px;height:5px;border-radius:3px;vertical-align:middle;margin-right:5px}
+.esc{border-collapse:collapse;font-size:12px}.esc th,.esc td{border:1px solid var(--ln);padding:0;text-align:center}.esc th{background:var(--bg);padding:3px 4px;font-weight:600}.esc th.we{color:var(--red)}
+.esc .nm2{text-align:left;position:sticky;left:0;min-width:140px;white-space:nowrap;padding:4px 8px;z-index:1}
+.ec{display:block;width:100%;min-width:30px;height:30px;border:0;background:none;cursor:pointer;font-weight:700;font-size:12px}
+.c-D{background:#0a5c8f;color:#fff}.c-N{background:#5b3fa0;color:#fff}.c-S{background:#c27a00;color:#fff}.c-FE{background:#14693d;color:#fff}.c-F{color:var(--mu)}
+.cv{font-size:11px;padding:3px!important}.cv.bad{background:var(--redb);color:var(--red);font-weight:700}.tot{padding:0 6px!important;font-weight:700}
+.x{background:none;border:0;color:var(--mu);cursor:pointer}
+.spd{background:var(--ambb)}.hd{cursor:pointer}
+.tb{width:100%;border-collapse:collapse}.tb th,.tb td{padding:7px 8px;border-bottom:1px solid var(--ln);text-align:left}.tb tr[data-q]{cursor:pointer}.tb tr[data-q]:hover{background:var(--blub)}
+:root{--bg:#eef2f6;--sf:#fff;--tx:#0f1b27;--mu:#5f7284;--ln:#dbe3ea;--ac:#0b7bc1;--sh:0 1px 2px rgba(15,27,39,.06),0 4px 14px rgba(15,27,39,.05)}
+:root[data-theme="dark"]{--bg:#0a1017;--sf:#111a24;--tx:#e6eef6;--mu:#8da0b2;--ln:#223140;--ac:#38bdf8;--acx:#04202f;--red:#ff6b6b;--redb:#3a171a;--amb:#fbbf24;--ambb:#33270c;--grn:#4ade80;--grnb:#102e1d;--blu:#38bdf8;--blub:#10293a;--sh:0 1px 0 rgba(255,255,255,.03),0 6px 18px rgba(0,0,0,.35)}
+header{border-top:0;padding:12px 20px}h1{font-size:18px;letter-spacing:-.01em}h1:before{content:"◈";color:var(--ac);margin-right:8px}
+.hact{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.hact .btn{padding:8px 14px;white-space:nowrap}
+.btn,select,input,textarea{border-radius:8px}select,input,textarea{padding:9px 10px}:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+nav{background:#0c1f31;border-right:0;width:224px;padding:16px 10px;gap:2px}:root[data-theme="dark"] nav{background:#0d151e;border-right:1px solid var(--ln)}
+nav button{color:#9fb4c7;border:0;border-radius:8px;padding:11px 12px;display:flex;gap:10px;align-items:center}nav button i{font-style:normal;width:18px;text-align:center}
+nav button:hover{background:rgba(255,255,255,.06);color:#fff}nav button[aria-current="true"]{background:rgba(56,189,248,.16);color:#fff;box-shadow:inset 3px 0 0 #38bdf8}
+main,#bn{max-width:1180px}
+.kpis{gap:12px}.kpi{display:flex;flex-direction:column-reverse;border-radius:14px;padding:16px 18px;box-shadow:var(--sh);position:relative;overflow:hidden}
+.kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ac)}.kpi.r:before{background:var(--red)}
+.kpi b{font-size:34px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.kpi span{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+.panel{border-radius:14px;box-shadow:var(--sh);padding:16px 18px}.panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);margin:0 0 12px}
+.panel .row>h2{font-size:18px;text-transform:none;letter-spacing:0;color:var(--tx);margin:0}
+.item{border-radius:12px;box-shadow:var(--sh);border-left-width:5px;padding:12px 14px}.item .t{font-size:15px}.item small{display:block;margin-top:4px}
+.item.s-Aberto,.item.s-Em{border-left-color:var(--ac)}.item.s-Aguardando{border-left-color:var(--amb)}.item.s-Encerrado{border-left-color:var(--grn)}.item.r{border-left-color:var(--red)}
+.age{background:var(--bg);border-radius:99px;padding:2px 10px;font-size:13px;align-self:start}.r .age{background:var(--redb)}
+.alert{border-radius:14px;padding:14px 18px;gap:12px 16px;box-shadow:var(--sh)}.alert .dot{width:12px;height:12px;border-radius:50%;background:var(--red);box-shadow:0 0 0 5px rgba(255,107,107,.22);flex:none}
+.alert.ok .dot{background:var(--grn);box-shadow:0 0 0 5px rgba(74,222,128,.22)}.alert .at{display:flex;flex-direction:column;line-height:1.25}.alert .at b{font-size:16px}.alert .at small{font-size:12px;opacity:.85}
+.alert .chips{display:flex;flex-wrap:wrap;gap:6px;flex:1}
+.rk{border-radius:10px;background:var(--bg);border-color:transparent}.bar{height:10px;border-radius:5px}.bar i{border-radius:5px}
+.bc .b{background:linear-gradient(180deg,var(--ac),color-mix(in srgb,var(--ac) 45%,transparent))}.bc:hover .b{filter:brightness(1.25)}
+.tb th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu)}
+@media (max-width:700px){nav{width:100%;flex-direction:row;overflow-x:auto;padding:6px 8px}nav button{white-space:nowrap;padding:9px 12px}nav button[aria-current="true"]{box-shadow:inset 0 -3px 0 #38bdf8}}
+:root{--cy:#0891b2}
+:root[data-theme="dark"]{--bg:#070b14;--sf:#0d1424;--tx:#e8edf7;--mu:#7d8ba6;--ln:#1a2640;--ac:#6d8cff;--acx:#071022;--cy:#22d3ee;--blu:#8fa8ff;--blub:#14204a;--sh:0 0 0 1px rgba(255,255,255,.02),0 8px 24px rgba(0,0,0,.35)}
+:root[data-theme="dark"] body{background:radial-gradient(900px 420px at 88% -8%,rgba(90,120,255,.14),transparent 70%),radial-gradient(700px 360px at 10% 0,rgba(34,211,238,.06),transparent 70%),var(--bg);background-attachment:fixed}
+.shell{min-height:100vh}.panel,.kpi,.item,.alert,.rk{border-color:var(--ln)}.bar i{background:var(--cy)}
+.content header{background:transparent;border:0;padding:22px 24px 4px}.content header h1:before{content:none}.content header h1{font-size:20px}
+.pill{border:1px solid var(--ln);border-radius:99px;padding:4px 12px;font-size:12px;color:var(--mu)}
+nav{width:236px;padding:18px 12px;background:#0a1120}:root[data-theme="light"] nav{background:#0c1f31}
+.brand{display:flex;gap:10px;align-items:center;padding:4px 8px 14px;color:#fff}.brand b{display:block;font-size:14px}.brand small{color:#7d8ba6;font-size:11px}
+.logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#6d8cff,#22d3ee);color:#06101f;font-size:18px}
+.ns{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5d6b85;margin:16px 10px 6px}
+nav button i{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.05);font-size:13px;display:grid;place-items:center}
+nav button[aria-current="true"]{background:rgba(109,140,255,.16);box-shadow:inset 0 0 0 1px rgba(109,140,255,.35)}nav button[aria-current="true"] i{background:rgba(109,140,255,.3);color:#fff}
+.who2{margin-top:auto;display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.04);color:#fff}.who2 b{display:block;font-size:13px}.who2 small{color:#7d8ba6;font-size:11px}
+.av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#1c2b4d;font-size:12px;font-weight:700}
+.lhead,.item{display:grid;grid-template-columns:2.2fr 1.2fr 1.3fr 1.4fr .9fr;gap:12px;align-items:center}
+.lhead{padding:0 16px 6px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);font-weight:600}
+.item{padding:12px 16px;border-left-width:4px}.item small{display:block;color:var(--mu);font-size:12px;margin-top:2px}
+.item .c1 b{font-size:14px}.item .c4{display:flex;flex-direction:column;gap:6px;align-items:flex-start}.item .c4 .bar{width:100%}.item .c5 b{font-size:16px;display:block}
+.tabs{display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--ln)}.tbn{background:none;border:0;border-bottom:2px solid transparent;padding:8px 14px;color:var(--mu);cursor:pointer;font-weight:600}.tbn.on{color:var(--ac);border-color:var(--ac)}
+@media (max-width:700px){.brand,.who2,.ns,.lhead{display:none}.item{grid-template-columns:1fr 1fr}nav{width:100%}.content header{padding:14px 16px 0}}
+.pill{font-variant-numeric:tabular-nums;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="shell"><nav id="nav"></nav><div class="content"><header><div><h1 id="pt">Dashboard</h1><div class="sub" id="ps"></div></div><div class="hact"><span class="pill" id="upd"></span><button class="btn" id="newb">+ Novo rompimento</button><button class="btn s" id="reset">Restaurar exemplos</button><button class="btn s" id="th" title="Alternar tema claro e escuro">◐</button></div></header>
+<div id="bn"></div>
+<main id="app"></main></div></div>
+<script>
+const H=36e5,D=24*H,ST=['Aberto','Em atendimento','Aguardando','Encerrado'];
+const SITES=['Agro Brasil','Cachoeiras de Macacu','Campo do Prado','Guapiaçu','Guapimirim','Japuiba','KM 70','Maraporã','Marubaí','Papucaia'];
+const OLTS=['OLT - AGROBRASIL-01 - EST8','OLT - AGROBRASIL-02 - EST8','OLT - CACHOEIRAS - EST1','OLT - GUAPIACU - EST4','OLT - JAPUIBA - EST3','OLT - KM70 - EST2','OLT - MARAPORA - EST5','OLT - MARUBAI - EST7','OLT - PAPUCAIA - EST6'];
+const CAUSES=['Rompimento por terceiros','Queda de poste','Vandalismo ou furto de cabo','Árvore sobre o cabo','Falha de equipamento','Não identificada'];
+const ORI=['Alarme do NMS/Zabbix','Reclamação de cliente','Equipe de campo','Aviso de terceiro'];
+const MET=['PON ou link online no NMS','Potência óptica ou OTDR dentro do padrão','Clientes voltaram a navegar','Confirmado pelo terceiro'];
+const WAIT=['Material','Liberação ou acesso','Terceiro (A, C, K ou concessionária)','Clima ou segurança'];
+const LIM=24,KEY='rompimentos-proto-v6',OWN=['Própria','K','C','A'];
+let st={view:'dash',sel:null,win:12,q:'',fs:'',tp:''},data=[],me='',notified={};
+const $=i=>document.getElementById(i),opts=(a,s)=>a.map(x=>`<option${x===s?' selected':''}>${x}</option>`).join('');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const last=o=>o.log[o.log.length-1],pend=()=>data.filter(o=>o.s!=='Encerrado').sort((a,b)=>a.opened-b.opened);
+const ext=o=>o.type==='Backbone'&&o.owner!=='Própria';
+const age=ms=>{const h=Math.floor(ms/H);return h>=24?`${Math.floor(h/24)}d ${h%24}h`:`${h}h ${Math.floor(ms%H/6e4)}min`};
+const dt=t=>new Date(t).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+const lv=t=>new Date(t-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16);
+const cls=o=>o.s!=='Encerrado'&&Date.now()-o.opened>D?'r':'';
+const tag=s=>`<span class="tag ${s.split(' ')[0]}">${s}</span>`;
+const kind=o=>o.type==='Backbone'?`<span class="tag k">Backbone</span> <span class="tag ${ext(o)?'ext':'ok'}">${o.owner==='Própria'?'Própria':'Terceiro '+esc(o.owner)}</span>`:'<span class="tag k">FTTH</span>';
+const late=o=>o.s!=='Encerrado'&&Date.now()-o.opened>LIM*H?'Mais de 1 dia aberto':'';
+const extra=o=>(o.type==='FTTH'?`PON(s) fora: ${esc(o.pons)} · Clientes off: <b>${o.clients||0}</b>`:`Dono: ${esc(o.owner)}${o.ticket?' · chamado '+esc(o.ticket):''}`)+'<br>';
+function recur(){const m={};data.forEach(o=>{(o.type==='FTTH'?o.pons.split(',').map(p=>p.trim()).filter(Boolean).map(p=>`${o.route} · PON ${p}`):[o.route]).forEach(k=>{m[k]=m[k]||{k,n:0,r:o.route};m[k].n++})});return Object.values(m).sort((a,b)=>b.n-a.n)}
+
+const hist=n=>[['Backbone','Guapimirim x Maraporã','Própria',12,6],['Backbone','Guapimirim x Maraporã','Própria',27,11],['Backbone','Guapimirim x Maraporã','Própria',41,5],['Backbone','Guapimirim x Maraporã','Própria',66,8],['Backbone','Campo do Prado x Japuiba','K',8,30],['Backbone','Campo do Prado x Japuiba','K',33,22],['Backbone','Campo do Prado x Japuiba','K',72,40],['Backbone','Japuiba x Marubaí','C',15,60],['Backbone','Japuiba x Marubaí','C',58,36],['Backbone','Cachoeiras de Macacu x Guapiaçu','A',47,14],['Backbone','Cachoeiras de Macacu x Guapiaçu','A',95,20],['FTTH',OLTS[6],'1/1/2',10,5],['FTTH',OLTS[6],'1/1/2',24,8],['FTTH',OLTS[6],'1/1/2',38,4],['FTTH',OLTS[6],'1/1/2',63,6],['FTTH',OLTS[3],'1/1/5',6,3],['FTTH',OLTS[3],'1/1/5',29,6],['FTTH',OLTS[3],'1/1/5',77,5],['FTTH',OLTS[5],'1/1/1',18,4],['FTTH',OLTS[5],'1/1/1',54,7],['FTTH',OLTS[2],'1/1/4',88,3]].map((x,i)=>{const t=n-x[3]*D,f=x[0]==='FTTH';return{id:900+i,type:x[0],route:x[1],owner:f?'':x[2],pons:f?x[2]:'',clients:f?30+i*7:0,alt:'Não',origin:ORI[0],by:'Histórico',local:'Registro histórico',cause:CAUSES[5],team:'-',impact:'-',s:'Encerrado',opened:t,log:[{t,who:'Histórico',s:'Aberto',txt:'Registro importado.'},{t:t+x[4]*H,who:'LG',s:'Encerrado',txt:'Encerrado.'}],close:{restored:t+x[4]*H,method:MET[0],validator:'LG',action:'Reparo executado.'}}});
+function seed(){const n=Date.now(),R=[
+{id:1041,type:'Backbone',route:'Guapimirim x Maraporã',owner:'Própria',alt:'Não',local:'Km 42 da estrada de acesso',cause:CAUSES[0],impact:'2 enlaces corporativos',team:'Equipe Fibra Norte',s:'Em atendimento',h:76,by:'K',lg:[[76,'K','Aberto','Alarme de perda de sinal. Trecho sem tráfego.'],[70,'J','Em atendimento','Equipe no local. Cabo rompido em dois pontos.'],[30,'M','Em atendimento','Fusões em andamento, 48 de 144 fibras prontas.']]},
+{id:1043,type:'FTTH',route:OLTS[6],pons:'1/1/2, 1/1/3',clients:180,local:'Rua das Acácias, Maraporã',cause:CAUSES[1],team:'Equipe Campo 2',s:'Aguardando',wait:WAIT[0],h:31,by:'M',lg:[[31,'M','Aberto','Poste caído sobre o lance de fibra. 2 PONs fora.'],[22,'J','Aguardando','Falta cordoalha e poste. Concessionária avisada.']]},
+{id:1045,type:'Backbone',route:'Campo do Prado x Japuiba',owner:'K',ticket:'K-48213',alt:'Sim',local:'Trecho de terceiro, perto do km 12',cause:CAUSES[2],impact:'Sem queda de cliente',team:'K',s:'Aguardando',wait:WAIT[2],h:14,by:'J',lg:[[14,'J','Aberto','Alarme de atenuação. Chamado aberto no terceiro K.'],[6,'J','Aguardando','Terceiro K sem previsão de reparo.']]},
+{id:1046,type:'FTTH',route:OLTS[3],pons:'1/1/5',clients:64,local:'Bairro Guapiaçu',cause:CAUSES[3],team:'Equipe Fibra Sul',s:'Aberto',h:3,by:'K',lg:[[3,'K','Aberto','PON 1/1/5 fora. Equipe sendo acionada.']]},
+{id:1047,type:'Backbone',route:'Japuiba x Marubaí',owner:'C',ticket:'C-0917',alt:'Não',local:'Travessia da ponte',cause:CAUSES[4],impact:'Enlace corporativo',team:'C',s:'Aberto',h:52,by:'M',lg:[[52,'M','Aberto','Aguardando posição do terceiro C.'],[20,'K','Aberto','Cobrado novamente, sem previsão.']]},
+{id:1040,type:'Backbone',route:'Agro Brasil x Papucaia',owner:'Própria',alt:'Não',local:'Ponte do rio, Papucaia',cause:CAUSES[0],team:'Equipe Fibra Norte',s:'Encerrado',h:52,by:'M',lg:[[52,'M','Aberto','Obra rompeu o duto.'],[8,'LG','Encerrado','Reparo concluído e validado.']],c:[9,1,'LG','Emendas refeitas e duto recomposto.']},
+{id:1044,type:'FTTH',route:OLTS[5],pons:'1/1/1',clients:0,local:'Rua do Porto, km 70',cause:CAUSES[4],team:'Equipe Campo 2',s:'Encerrado',h:9,by:'J',lg:[[9,'J','Aberto','PON 1/1/1 fora. 40 clientes off.'],[4,'J','Encerrado','Placa reiniciada.']],c:[4,0,'J','Placa reiniciada, PON voltou online.']}];
+return R.map(r=>({origin:ORI[0],team:'-',impact:'-',...r,opened:n-r.h*H,log:r.lg.map(l=>({t:n-l[0]*H,who:l[1],s:l[2],txt:l[3]})),close:r.c?{restored:n-r.c[0]*H,method:MET[r.c[1]],validator:r.c[2],action:r.c[3]}:null})).concat(hist(n))}
+const load=()=>{try{const r=localStorage.getItem(KEY);if(r){data=JSON.parse(r);return}}catch(e){}data=seed()};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}};
+
+const LH='<div class="lhead"><span>Rota</span><span>Status</span><span>Rede</span><span>Tempo</span><span>Impacto</span></div>';
+const card=o=>{const e=o.s==='Encerrado',pc=Math.min(100,dur(o)/H/24*100),c=pc>=100?'var(--red)':pc>60?'var(--amb)':'var(--cy)',im=o.impact&&!['Não informado','-'].includes(o.impact)?esc(o.impact):'Sem informação';
+ return `<button class="item ${cls(o)} s-${o.s.split(' ')[0]}" data-id="${o.id}"><span class="c1"><b>#${o.id} · ${esc(o.route)}</b><small>${o.type==='FTTH'?'PON(s): '+esc(o.pons)+' · ':''}aberto por ${esc(o.by)}</small></span><span class="c2">${tag(o.s)}<small>Aberta ${dt(o.opened)}</small>${e&&o.close?`<small>Resolvida ${dt(o.close.restored)}</small>`:''}</span><span class="c3">${kind(o)}</span><span class="c4"><span class="age">${age(dur(o))}</span>${e?'':`<span class="bar"><i style="width:${pc}%;background:${c}"></i></span>`}</span><span class="c5">${o.type==='FTTH'?`<b>${o.clients||0}</b><small>clientes off</small>`:`<small>${im}</small>`}</span></button>`};
+function detail(){const o=data.find(x=>x.id===st.sel);if(!o)return '';
+ const tl=[...o.log].reverse().map(l=>`<div><b>${l.s}</b> <small>${dt(l.t)} · ${esc(l.who)}${l.why?' · '+esc(l.why):''}</small><br>${esc(l.txt)}</div>`).join('');
+ const c=o.close?`<p class="okbox">Serviço restabelecido em <b>${dt(o.close.restored)}</b>. Validado por ${esc(o.close.validator)}: ${esc(o.close.method)}.<br>Ação: ${esc(o.close.action)}</p>`:'';
+ return `<div class="panel"><div class="row" style="justify-content:space-between"><h2>#${o.id} · ${esc(o.route)}</h2><button class="btn s" id="close" style="flex:0">Fechar</button></div>
+ <p>${tag(o.s)} ${kind(o)}<br>${o.s==='Encerrado'?'Ficou down por':'Início há'} <b>${age(dur(o))}</b> · aberto por ${esc(o.by)} em ${dt(o.opened)}${o.close?' · resolvido em '+dt(o.close.restored):''}<br><span class="sub">${extra(o)}</span></p>${c}${o.type==='FTTH'?`<h2 style="margin:12px 0 6px">Frequência das PONs afetadas</h2><div style="overflow-x:auto">${ponT(o.route,ponsOf(o))}</div>`:''}
+ <div class="grid"><div><label>Quem atualizou *</label><select id="uw">${opts(ESC.emp,me)}</select></div><div><label>Novo status</label><select id="ns">${opts(ST,o.s)}</select></div>
+ ${o.type==='FTTH'?`<div><label>Clientes off agora</label><input id="nc" type="number" min="0" value="${o.clients||0}"></div><div><label>PON(s) afetadas</label><input id="np" value="${esc(o.pons)}"></div>`:''}
+ 
+ <div id="bc" class="grid" style="grid-column:1/-1"><div><label>Serviço restabelecido às *</label><input id="cr" type="datetime-local" value="${lv(Date.now())}"></div><div><label>Como foi validado *</label><select id="cm">${opts(MET)}</select></div><div><label>Quem validou *</label><select id="cv">${opts(ESC.emp)}</select></div><div><label>Ação realizada *</label><input id="ca"></div></div>
+ <div style="grid-column:1/-1"><label>Observação *</label><textarea id="nt" rows="2" placeholder="O que foi feito e, se ainda não foi concluído, o porquê"></textarea></div><p class="note" style="grid-column:1/-1;margin:0"><b>Aberto</b>: registrado, ninguém atuando ainda · <b>Em atendimento</b>: alguém está trabalhando · <b>Aguardando</b>: parado, o motivo vai na observação · <b>Encerrado</b>: serviço normalizado e validado.</p></div>
+ <div class="row" style="margin-top:10px"><button class="btn" id="add" style="flex:0">Registrar atualização</button></div><div class="tl">${tl}</div></div>`}
+function wireDetail(){if(!$('close'))return;$('close').onclick=()=>{st.sel=null;render()};
+ const tg=()=>{$('bc').style.display=$('ns').value==='Encerrado'?'':'none'};$('ns').onchange=tg;tg();
+ $('add').onclick=()=>{const v=i=>$(i).value.trim(),o=data.find(x=>x.id===st.sel),s=$('ns').value;
+  if(!v('uw')||!v('nt')){alert('Informe quem atualizou e a observação.');return}
+  if(s==='Encerrado'&&(!v('cr')||!v('cv')||!v('ca'))){alert('Para encerrar, informe o horário de restabelecimento, quem validou e a ação realizada.');return}
+  me=v('uw');o.s=s;if($('nc'))o.clients=+$('nc').value||0;if($('np'))o.pons=$('np').value.split(/[,;\s]+/).filter(Boolean).join(', ')||o.pons;const e={t:Date.now(),who:me,s,txt:v('nt')};
+  
+  if(s==='Encerrado')o.close={restored:new Date($('cr').value).getTime(),method:$('cm').value,validator:v('cv'),action:v('ca')};
+  o.log.push(e);save();render()}}
+
+const mini=o=>`<button class="rk" data-id="${o.id}"><span class="nm">#${o.id} ${esc(o.route)}</span><span>${tag(o.s)}</span><b>${age(Date.now()-o.opened)}</b>${late(o)?'<span class="tag late">Atenção</span>':'<span></span>'}</button>`;
+function vDash(){const p=pend(),n=Date.now(),lt=p.filter(late).length,cl=p.reduce((s,o)=>s+(o.type==='FTTH'?o.clients||0:0),0),w7=data.filter(o=>o.s==='Encerrado'&&n-last(o).t<7*D).length;
+ const k=(v,l,c='')=>`<div class="kpi ${c}"><b>${v}</b><span>${l}</span></div>`;
+ const cnt=Array.from({length:14},(_,j)=>data.filter(o=>Math.floor((n-o.opened)/D)===13-j).length),mx=Math.max(1,...cnt);
+ const bars=cnt.map(c=>`<div class="bc"><small>${c}</small><div class="b" style="height:${c/mx*80}%"></div></div>`).join('');
+ const tp=[['FTTH',p.filter(o=>o.type==='FTTH').length],['Backbone',p.filter(o=>o.type==='Backbone').length]],tm=Math.max(1,...tp.map(x=>x[1]));
+ const rk=recur().slice(0,5),mn=rk.length?rk[0].n:1;
+ return detail()+`<div class="kpis">${k(p.length,'Pendentes')}${k(lt,'Precisam de atenção',lt?'r':'')}${k(cl,'Clientes off (FTTH)')}${k(w7,'Resolvidos em 7 dias')}</div>
+ <div class="cols"><div class="panel"><h2>Ocorrências por dia (14 dias)</h2><div class="bars">${bars}</div></div>
+ <div class="panel"><h2>Pendentes por tipo</h2>${tp.map(x=>`<div class="rk" style="cursor:default"><span class="nm">${x[0]}</span><span class="bar"><i style="width:${x[1]/tm*100}%"></i></span><b>${x[1]}</b><span></span></div>`).join('')}</div></div>
+ <div class="cols"><div class="panel"><h2>Pendentes mais antigos</h2>${p.slice(0,5).map(mini).join('')||'<div class="empty">Nada pendente.</div>'}</div>
+ <div class="panel"><h2>Mais reincidentes</h2>${rk.map(x=>`<button class="rk" data-q="${esc(x.r)}"><span class="nm">${esc(x.k)}</span><span class="bar"><i style="width:${x.n/mn*100}%"></i></span><b>${x.n}x</b>${x.n>=3?'<span class="tag late">Reincidente</span>':'<span></span>'}</button>`).join('')}</div></div>`}
+function vPend(){const l=pend().filter(o=>!st.tp||(st.tp==='ext'?ext(o):o.type===st.tp));
+ return `<div class="tabs">${[['','Todos'],['FTTH','FTTH'],['Backbone','Backbone']].map(x=>`<button class="tbn${st.tp===x[0]?' on':''}" data-tp="${x[0]}">${x[1]}</button>`).join('')}</div>${detail()}${l.length?LH+l.map(card).join(''):'<div class="empty">Nenhum rompimento pendente.</div>'}<p class="note">Em vermelho: rompimentos abertos há mais de 1 dia.</p>`}
+const vNovo=()=>`<div class="panel"><h2>Novo rompimento</h2><div class="grid">
+<div><label>Quem abriu *</label><select id="nw0">${opts(ESC.emp,me)}</select></div>
+<div><label>Tipo de rede *</label><select id="ft"><option value="FTTH">FTTH (OLT / PON)</option><option value="Backbone">Backbone (trecho / PE)</option></select></div>
+<div><label>Início do evento *</label><input id="ti" type="datetime-local" value="${lv(Date.now())}"></div>
+
+<div class="fh"><label>OLT *</label><select id="ol">${opts(OLTS)}</select></div>
+<div class="fh"><label>PON(s) fora *</label><input id="fp" placeholder="Ex.: 0/1/0, 0/1/1"></div>
+<div class="fh"><label>Clientes off *</label><input id="fc" type="number" min="0"></div>
+<div class="bb"><label>Trecho: ponta A *</label><select id="ta">${opts(SITES,'Maraporã')}</select></div>
+<div class="bb"><label>Trecho: ponta B *</label><select id="tb">${opts(SITES,'Guapimirim')}</select></div>
+<div class="bb"><label>De quem é o trecho *</label><select id="fo">${opts(OWN)}</select></div>
+<div class="bb" id="tk"><label>Nº do chamado com o terceiro</label><input id="fk"></div>
+
+<div class="bb"><label>Serviços afetados</label><input id="fi"></div>
+
+
+
+<div style="grid-column:1/-1"><label>Observação inicial *</label><textarea id="f6" rows="3" placeholder="O que foi informado e o que já foi feito"></textarea></div></div>
+<div class="row" style="margin-top:10px"><button class="btn" id="save" style="flex:0">Abrir rompimento</button></div></div>`;
+function wireNovo(){if(!$('save'))return;const tg=()=>{const b=$('ft').value==='Backbone';document.querySelectorAll('.bb').forEach(e=>e.style.display=b?'':'none');document.querySelectorAll('.fh').forEach(e=>e.style.display=b?'none':'');if(b)$('tk').style.display=$('fo').value==='Própria'?'none':''};const ao=()=>{const t=TRS.find(x=>tk(x[0],x[1])===tk($('ta').value,$('tb').value));if(t){$('fo').value=t[2];tg()}};$('ft').onchange=tg;$('fo').onchange=tg;$('ta').onchange=ao;$('tb').onchange=ao;tg();ao();
+ $('save').onclick=()=>{const v=i=>$(i).value.trim(),f=$('ft').value==='FTTH',a=v('ta'),b=v('tb');
+  if(!v('f6')||(f?!v('fp')||v('fc')==='':a===b)){alert(f?'Preencha PON(s), clientes off e a observação.':'Preencha a observação e escolha pontas A e B diferentes.');return}
+  me=v('nw0');const id=Math.max(...data.map(o=>o.id))+1,o={id,s:'Aberto',opened:new Date($('ti').value).getTime()||Date.now(),by:me,impact:v('fi')||'Não informado',...(f?{type:'FTTH',route:v('ol'),pons:v('fp').split(/[,;\s]+/).filter(Boolean).join(', '),clients:+v('fc')||0}:{type:'Backbone',route:[a,b].sort().join(' x '),owner:v('fo'),ticket:v('fk')})};
+  o.log=[{t:Date.now(),who:me,s:'Aberto',txt:v('f6')}];data.push(o);save();st.view='pend';st.sel=id;render()}}
+
+let TRS=[],ESC={};
+const sv=(k,v)=>{try{localStorage.setItem(KEY+k,JSON.stringify(v))}catch(e){}},ld=(k,d)=>{try{const r=localStorage.getItem(KEY+k);if(r)return JSON.parse(r)}catch(e){}return d()};
+const tk=(a,b)=>[a,b].sort().join(' x '),OC={'Própria':'#0a7d4f','K':'#7b4cd6','C':'#c27a00','A':'#0b8aa5'};
+const NODES=[['Agro Brasil','AGROBRASIL',90,70],['Papucaia','PAPUCAIA',90,190],['Campo do Prado','CACHOEIRAS',240,100],['Japuiba','JAPUIBA',400,70],['Marubaí','MARUBAI',570,120],['Cachoeiras de Macacu','',330,220],['Guapiaçu','GUAPIACU',150,320],['KM 70','KM70',260,380],['Maraporã','MARAPORA',430,350],['Guapimirim','GUAPIMIRIM',590,300]];
+const seedTr=()=>[['Agro Brasil','Papucaia','Própria'],['Agro Brasil','Campo do Prado','Própria'],['Campo do Prado','Japuiba','K'],['Japuiba','Marubaí','C'],['Campo do Prado','Cachoeiras de Macacu','Própria'],['Cachoeiras de Macacu','Japuiba','Própria'],['Cachoeiras de Macacu','Papucaia','Própria'],['Cachoeiras de Macacu','Guapiaçu','A'],['Cachoeiras de Macacu','Maraporã','Própria'],['Guapiaçu','KM 70','Própria'],['KM 70','Maraporã','A'],['Guapimirim','Maraporã','Própria'],['Guapimirim','Marubaí','C']];
+function vMapa(){const p=pend(),nd=Object.fromEntries(NODES.map(n=>[n[0],n])),bad=new Set(p.filter(o=>o.type==='Backbone').map(o=>o.route));
+ const ln=TRS.map(t=>{const a=nd[t[0]],b=nd[t[1]],k=tk(t[0],t[1]),br=bad.has(k),s=st.tr===k,L=`x1="${a[2]}" y1="${a[3]}" x2="${b[2]}" y2="${b[3]}"`;return `<g data-tr="${esc(k)}" style="cursor:pointer"><line ${L} stroke="transparent" stroke-width="16"/><line ${L} stroke="${br?'#d92d20':OC[t[2]]}" stroke-width="${s?7:br?5:3.5}"${br?' stroke-dasharray="9 6"':''}/></g>`}).join('');
+ const nn=NODES.map(n=>{const f=p.filter(o=>o.type==='FTTH'&&n[1]&&o.route.toUpperCase().replace(/[^A-Z0-9]/g,'').includes(n[1])),c=f.reduce((s,o)=>s+(o.clients||0),0);return `<g><circle cx="${n[2]}" cy="${n[3]}" r="10" style="fill:var(--sf);stroke:${f.length?'#d92d20':'var(--tx)'};stroke-width:${f.length?4:2}"/><text x="${n[2]}" y="${n[3]-16}" text-anchor="middle" class="mt">${esc(n[0])}</text>${f.length?`<text x="${n[2]}" y="${n[3]+28}" text-anchor="middle" class="mt" style="fill:#d92d20">${c} clientes off</text>`:''}</g>`}).join('');
+ const sel=st.tr&&TRS.find(t=>tk(t[0],t[1])===st.tr),hs=sel?data.filter(o=>o.type==='Backbone'&&o.route===st.tr):[],pn=NODES.map(n=>n[0]);
+ return `<svg class="map" viewBox="0 0 680 430">${ln}${nn}</svg><div class="lg">${Object.keys(OC).map(k=>`<span><i style="background:${OC[k]}"></i>${k==='Própria'?k:'Terceiro '+k} (${TRS.filter(t=>t[2]===k).length})</span>`).join('')}<span><i style="background:#d92d20"></i>Rompimento pendente (tracejado)</span></div>
+ ${sel?`<div class="panel"><h2>${esc(st.tr)}</h2><div class="grid"><div><label>De quem é o trecho</label><select id="mo">${opts(OWN,sel[2])}</select></div></div><p>Ocorrências registradas: <b>${hs.length}</b> · pendentes: <b>${hs.filter(o=>o.s!=='Encerrado').length}</b></p><div class="row"><button class="btn s" id="mh">Ver histórico</button><button class="btn s" id="md">Remover trecho</button></div></div>`:'<p class="note">Clique em um trecho do mapa para ver o dono e as ocorrências. O desenho é esquemático, não geográfico.</p>'}
+ <div class="panel"><h2>Adicionar trecho</h2><div class="row"><select id="na">${opts(pn,'Maraporã')}</select><select id="nb">${opts(pn,'Guapimirim')}</select><select id="no">${opts(OWN)}</select><button class="btn" id="nt" style="flex:0">Adicionar</button></div></div>`}
+function wireMapa(){document.querySelectorAll('[data-tr]').forEach(g=>g.onclick=()=>{st.tr=g.dataset.tr;render()});
+ if($('mo'))$('mo').onchange=e=>{TRS.find(t=>tk(t[0],t[1])===st.tr)[2]=e.target.value;sv('t',TRS);render()};
+ if($('mh'))$('mh').onclick=()=>{st.oc=st.tr;st.view='oc';render()};
+ if($('md'))$('md').onclick=()=>{TRS=TRS.filter(t=>tk(t[0],t[1])!==st.tr);st.tr=null;sv('t',TRS);render()};
+ if($('nt'))$('nt').onclick=()=>{const a=$('na').value,b=$('nb').value;if(a===b||TRS.some(t=>tk(t[0],t[1])===tk(a,b))){alert('Escolha duas pontas diferentes que ainda não tenham trecho.');return}TRS.push([a,b,$('no').value]);st.tr=tk(a,b);sv('t',TRS);render()}}
+const CYC=['','P','FE'],dk=(y,m,d)=>`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+const easter=y=>{const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,q=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*q+114)/31),da=(h+l-7*q+114)%31+1;return new Date(y,mo-1,da)};
+const isHol=(y,m,d)=>{const c=(ESC.hol||{})[dk(y,m,d)];if(c!==undefined)return c;const f=`${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,e=easter(y);e.setDate(e.getDate()-2);return ['01-01','04-21','05-01','09-07','10-12','11-02','11-15','11-20','12-25'].includes(f)||(e.getMonth()===m&&e.getDate()===d)};
+const isSp=(y,m,d)=>[0,6].includes(new Date(y,m,d).getDay())||isHol(y,m,d);
+function gen(y,m){const cnt={},pr=k=>{const[e,ds]=k.split('|'),[yy,mm,dd]=ds.split('-').map(Number);return[e,yy,mm-1,dd]};ESC.emp.forEach(e=>cnt[e]=0);
+ Object.keys(ESC.cells).forEach(k=>{const[e,yy,mm,dd]=pr(k);if(ESC.cells[k]==='P'&&isSp(yy,mm,dd)&&!(yy===y&&mm===m)&&e in cnt)cnt[e]++});
+ let pair=[];for(let d=1;d<=new Date(y,m+1,0).getDate();d++){const k=dk(y,m,d),free=ESC.emp.filter(e=>ESC.cells[e+'|'+k]!=='FE');free.forEach(e=>delete ESC.cells[e+'|'+k]);
+  if(!isSp(y,m,d)){free.forEach(e=>ESC.cells[e+'|'+k]='P');continue}
+  if(!(d>1&&isSp(y,m,d-1)&&new Date(y,m,d).getDay()===0)||!pair.length){pair=[...free].sort((a,b)=>cnt[a]-cnt[b]).slice(0,2);pair.forEach(e=>cnt[e]++)}
+  pair.filter(e=>free.includes(e)).forEach(e=>ESC.cells[e+'|'+k]='P')}}
+function seedEsc(){const n=new Date(),E={emp:['K','LU','LI','M','W','J','F','A','LG'],cells:{},hol:{}},o=ESC;ESC=E;gen(n.getFullYear(),n.getMonth());ESC=o;return E}
+function vEscala(){const mo=st.mo||(st.mo=[new Date().getFullYear(),new Date().getMonth()]),[y,m]=mo,days=Array.from({length:new Date(y,m+1,0).getDate()},(_,i)=>i+1),g=(e,d)=>ESC.cells[e+'|'+dk(y,m,d)]||'',wd=d=>new Date(y,m,d).getDay();
+ const mn=new Date(y,m,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+ const head=days.map(d=>`<th class="hd ${isSp(y,m,d)?'we':''}" data-h="${dk(y,m,d)}" title="Clique para marcar ou desmarcar feriado">${d}<br><small>${'DSTQQSS'[wd(d)]}</small>${isHol(y,m,d)?'<br><small>fer</small>':''}</th>`).join('');
+ const rows=ESC.emp.map(e=>{const w=days.filter(d=>g(e,d)==='P');return `<tr><th class="nm2">${esc(e)} <button class="x" data-rm="${esc(e)}" title="Remover">×</button></th>${days.map(d=>{const c=g(e,d);return `<td class="${isSp(y,m,d)?'spd':''}"><button class="ec c-${c||'F'}" data-e="${esc(e)}" data-d="${d}">${c}</button></td>`}).join('')}<td class="tot">${w.length}</td><td class="tot">${w.filter(d=>isSp(y,m,d)).length}</td></tr>`}).join('');
+ const cov=days.map(d=>`<td class="cv${ESC.emp.filter(e=>g(e,d)==='P').length>=2?'':' bad'}">${ESC.emp.filter(e=>g(e,d)==='P').length}</td>`).join('');
+ return `<div class="row"><button class="btn s" id="mprev" style="flex:0">◀</button><h2 style="margin:0;text-align:center;text-transform:capitalize">${mn}</h2><button class="btn s" id="mnext" style="flex:0">▶</button></div>
+ <div class="panel"><div style="overflow-x:auto" id="esw"><table class="esc"><thead><tr><th class="nm2">Equipe</th>${head}<th>Dias</th><th>FDS/fer.</th></tr></thead><tbody>${rows}<tr><th class="nm2">Pessoas no plantão</th>${cov}<td></td><td></td></tr></tbody></table></div>
+ <p class="note">P = plantão das 05h às 00h · FE = férias · vazio = folga. Em dias úteis todos trabalham. Fins de semana e feriados (colunas amarelas) têm 2 pessoas em rodízio, escolhidas entre quem tem menos plantões acumulados. Clique numa célula para trocar e no número do dia para marcar ou desmarcar feriado. Vermelho: menos de 2 pessoas.</p>
+ <div class="row"><input id="ne" placeholder="Sigla do novo funcionário"><button class="btn" id="ae" style="flex:0">Adicionar</button><button class="btn s" id="gen" style="flex:0;white-space:nowrap">Gerar escala do mês</button></div></div>`}
+function wireEscala(){if(!$('mprev'))return;const sc=$('esw');sc.scrollLeft=st.sx||0;const keep=()=>st.sx=sc.scrollLeft,mv=n=>{let[y,m]=st.mo;m+=n;if(m<0){m=11;y--}if(m>11){m=0;y++}st.mo=[y,m];st.sx=0;render()};
+ $('mprev').onclick=()=>mv(-1);$('mnext').onclick=()=>mv(1);
+ document.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{const k=b.dataset.e+'|'+dk(st.mo[0],st.mo[1],+b.dataset.d),c=CYC[(CYC.indexOf(ESC.cells[k]||'')+1)%CYC.length];if(c)ESC.cells[k]=c;else delete ESC.cells[k];sv('e',ESC);keep();render()});
+ document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{const[yy,mm,dd]=b.dataset.h.split('-').map(Number);ESC.hol=ESC.hol||{};ESC.hol[b.dataset.h]=!isHol(yy,mm-1,dd);sv('e',ESC);keep();render()});
+ document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{if(confirm('Remover '+b.dataset.rm+' da escala?')){ESC.emp=ESC.emp.filter(e=>e!==b.dataset.rm);sv('e',ESC);render()}});
+ $('gen').onclick=()=>{if(confirm('Gerar a escala deste mês? Isso substitui as marcações do mês, exceto férias.')){gen(st.mo[0],st.mo[1]);sv('e',ESC);render()}};
+ $('ae').onclick=()=>{const n=$('ne').value.trim();if(n&&!ESC.emp.includes(n)){ESC.emp.push(n);sv('e',ESC);render()}}}
+const MES=m=>new Date(2000,m,1).toLocaleDateString('pt-BR',{month:'long'}),dur=o=>(o.s==='Encerrado'&&o.close?o.close.restored:Date.now())-o.opened,keys=o=>o.type==='FTTH'?o.pons.split(',').map(p=>p.trim()).filter(Boolean).map(p=>`${o.route} · PON ${p}`):[o.route],inMo=(o,y,m)=>{const d=new Date(o.opened);return d.getFullYear()===y&&d.getMonth()===m};
+function vFin(){const q=st.q.toLowerCase(),l=data.filter(o=>o.s==='Encerrado'&&(!q||(o.route+o.local+o.cause+o.id).toLowerCase().includes(q))).sort((a,b)=>last(b).t-last(a).t);
+ return `<div class="row"><input id="q" placeholder="Buscar por rota, local, causa ou número" value="${esc(st.q)}"></div>${detail()}${l.length?LH+l.map(card).join(''):'<div class="empty">Nenhum rompimento finalizado.</div>'}`}
+function vOc(){const [y,m]=st.om||(st.om=[new Date().getFullYear(),new Date().getMonth()]),mp={},tm=data.filter(o=>inMo(o,y,m));
+ 
+ const rows=monthRows(y,m),six=Array.from({length:6},(_,i)=>{const d=new Date(y,m-5+i,1);return{l:MES(d.getMonth()).slice(0,3),c:data.filter(o=>inMo(o,d.getFullYear(),d.getMonth())).length}}),mx=Math.max(1,...six.map(x=>x.c)),hs=st.oc?data.filter(o=>o.route===st.oc).sort((a,b)=>b.opened-a.opened):[];
+ return `<div class="row"><button class="btn s" id="oprev" style="flex:0">◀</button><h2 style="margin:0;text-align:center;text-transform:capitalize">${MES(m)} de ${y}</h2><button class="btn s" id="onext" style="flex:0">▶</button></div><div class="row"><button class="btn s" id="ex1">⭳ Ocorrências do mês (planilha)</button><button class="btn s" id="ex2">⭳ Resumo por rota (planilha)</button><button class="btn s" id="ex3">⭳ Todas as ocorrências</button></div>${detail()}
+ <div class="kpis"><div class="kpi"><b>${tm.length}</b><span>Quedas no mês (total de rompimentos)</span></div><div class="kpi"><b>${rows.length}</b><span>Rotas e PONs diferentes que caíram</span></div></div>
+ <div class="cols"><div class="panel"><h2>Quedas por mês</h2><div class="bars">${six.map(x=>`<div class="bc"><small>${x.c}</small><div class="b" style="height:${x.c/mx*75}%"></div><small>${x.l}</small></div>`).join('')}</div></div>
+ <div class="panel"><h2>Quantas vezes cada rota caiu</h2>${rows.length?`<div style="overflow-x:auto"><table class="tb"><tr><th>Rota ou PON</th><th>Tipo</th><th>Quedas</th><th>Tempo down</th><th>Caiu junto com</th></tr>${rows.map(x=>`<tr data-q="${esc(x.r)}"><td>${esc(x.k)}</td><td>${x.t}</td><td><b>${x.n}x</b> ${x.n>=3?'<span class="tag late">Reincidente</span>':''}</td><td>${age(x.ms)}${x.op?' (em aberto)':''}</td><td>${x.t==='FTTH'?coTxt(x.co):'—'}</td></tr>`).join('')}</table></div>`:'<div class="empty">Nenhuma queda neste mês.</div>'}</div></div>
+ ${st.oc?`<h2>Histórico de ${esc(st.oc)}</h2>${ponT(st.oc)?`<div class="panel"><h2>PONs desta OLT: frequência e quedas em conjunto</h2><div style="overflow-x:auto">${ponT(st.oc)}</div></div>`:''}${hs.map(card).join('')}`:'<p class="note">Clique numa linha para ver todas as quedas daquela rota.</p>'}`}
+function wireOc(){if(!$('oprev'))return;const mv=n=>{let[y,m]=st.om;m+=n;if(m<0){m=11;y--}if(m>11){m=0;y++}st.om=[y,m];render()};$('oprev').onclick=()=>mv(-1);$('onext').onclick=()=>mv(1);const[y,m]=st.om,mm=String(m+1).padStart(2,'0');$('ex1').onclick=()=>csv(`ocorrencias-${y}-${mm}.csv`,occRows(data.filter(o=>inMo(o,y,m))));$('ex2').onclick=()=>csv(`resumo-por-rota-${y}-${mm}.csv`,sumRows(y,m));$('ex3').onclick=()=>csv('todas-as-ocorrencias.csv',occRows(data))}
+const ponsOf=o=>o.type==='FTTH'?o.pons.split(',').map(p=>p.trim()).filter(Boolean):[];
+const coTxt=(co,raw)=>Object.entries(co).sort((a,b)=>b[1]-a[1]).map(([q,n])=>`${raw?q:esc(q)} (${n}x)`).join(', ')||'—';
+const ponStats=(r,only)=>{const m={};data.filter(o=>o.type==='FTTH'&&o.route===r).forEach(o=>{const ps=ponsOf(o);ps.forEach(p=>{const x=m[p]=m[p]||{p,n:0,last:0,co:{}};x.n++;x.last=Math.max(x.last,o.opened);ps.filter(q=>q!==p).forEach(q=>x.co[q]=(x.co[q]||0)+1)})});return Object.values(m).filter(x=>!only||only.includes(x.p)).sort((a,b)=>b.n-a.n)};
+const ponT=(r,only)=>{const l=ponStats(r,only);return l.length?`<table class="tb"><tr><th>PON</th><th>Quedas registradas</th><th>Última queda</th><th>Caiu junto com</th></tr>${l.map(x=>`<tr><td>${esc(x.p)}</td><td><b>${x.n}x</b> ${x.n>=3?'<span class="tag late">Reincidente</span>':''}</td><td>${dt(x.last)}</td><td>${coTxt(x.co)}</td></tr>`).join('')}</table>`:''};
+const monthRows=(y,m)=>{const mp={};data.filter(o=>inMo(o,y,m)).forEach(o=>{const ps=ponsOf(o);(o.type==='FTTH'?ps.map(p=>[`${o.route} · PON ${p}`,p]):[[o.route,'']]).forEach(([k,p])=>{const r=mp[k]=mp[k]||{k,r:o.route,t:o.type,n:0,ms:0,op:0,co:{}};r.n++;r.ms+=dur(o);if(o.s!=='Encerrado')r.op++;ps.filter(q=>q!==p).forEach(q=>r.co[q]=(r.co[q]||0)+1)})});return Object.values(mp).sort((a,b)=>b.n-a.n||b.ms-a.ms)};
+const fd=t=>new Date(t).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',',''),hh=ms=>(ms/H).toFixed(1).replace('.',',');
+const csv=(name,rows)=>{const t='\ufeff'+rows.map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(';')).join('\r\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();a.remove()};
+const occRows=l=>[['Nº','Tipo','Rota ou OLT','PON(s)','Dono do trecho','Chamado do terceiro','Clientes off','Aberta em','Resolvida em','Horas down','Status','Aberto por','Validado por','Como foi validado','Ação realizada','Observações']].concat([...l].sort((a,b)=>a.opened-b.opened).map(o=>[o.id,o.type,o.route,o.type==='FTTH'?o.pons:'',o.type==='Backbone'?(o.owner==='Própria'?'Própria':'Terceiro '+o.owner):'',o.ticket||'',o.type==='FTTH'?o.clients||0:'',fd(o.opened),o.close?fd(o.close.restored):'',hh(dur(o)),o.s,o.by,o.close?o.close.validator:'',o.close?o.close.method:'',o.close?o.close.action:'',o.log.map(g=>`${fd(g.t)} ${g.who}: ${g.txt}`).join(' | ')]));
+const sumRows=(y,m)=>[['Rota ou PON','Tipo','Quedas no mês','Horas down','Caiu junto com']].concat(monthRows(y,m).map(x=>[x.k,x.t,x.n,hh(x.ms),x.t==='FTTH'?coTxt(x.co,1):'']));
+function bn(){$('bn').style.display=st.view==='dash'?'':'none';const l=pend().filter(late);$('bn').innerHTML=l.length?`<div class="alert"><span class="dot"></span><div class="at"><b>${l.length} rompimento(s) precisam de atenção</b><small>Abertos há mais de 1 dia</small></div><div class="chips">${l.map(o=>`<button class="chip" data-al="${o.id}">#${o.id} ${esc(o.route)} · ${age(dur(o))}</button>`).join('')}<button class="chip n" id="en">Ativar avisos</button></div></div>`:'<div class="alert ok"><span class="dot"></span><div class="at"><b>Operação normal</b><small>Nenhum rompimento precisa de atenção</small></div></div>';
+ document.querySelectorAll('[data-al]').forEach(b=>b.onclick=()=>{st.view='pend';st.sel=+b.dataset.al;render()});
+ if($('en'))$('en').onclick=()=>{try{Notification.requestPermission().then(checkAlerts)}catch(x){alert('Este navegador não permite avisos.')}}}
+function checkAlerts(){bn();try{if(window.Notification&&Notification.permission==='granted')pend().filter(late).forEach(o=>{if(!notified[o.id]){notified[o.id]=1;new Notification(`Rompimento #${o.id}: ${late(o)}`,{body:o.route})}})}catch(e){}}
+function wire(){document.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{st.sel=+b.dataset.id;render()});
+ document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{st.oc=b.dataset.q;st.view='oc';st.sel=null;render()});
+ if($('win'))$('win').onchange=e=>{st.win=+e.target.value;render()};
+ document.querySelectorAll('[data-tp]').forEach(b=>b.onclick=()=>{st.tp=b.dataset.tp;render()});
+ if($('fs'))$('fs').onchange=e=>{st.fs=e.target.value;render()};
+ if($('q'))$('q').oninput=e=>{st.q=e.target.value;const p=e.target.selectionStart;render();$('q').focus();$('q').setSelectionRange(p,p)};
+ wireDetail();wireNovo();wireMapa();wireEscala();wireOc()}
+function render(){const T=[['Visão geral',[['dash','▦','Dashboard']]],['Operação',[['pend','⚠','Pendências'],['fin','✓','Finalizados'],['oc','↻','Ocorrências']]],['Rede',[['mapa','⌁','Trechos']]],['Equipe',[['escala','▤','Escala']]]];
+ $('nav').innerHTML=`<div class="brand"><span class="logo">◈</span><div><b>Monitoramento</b><small>Rompimentos · v0.1</small></div></div>`+T.map(g=>`<div class="ns">${g[0]}</div>`+g[1].map(t=>`<button data-v="${t[0]}" aria-current="${st.view===t[0]}"><i>${t[1]}</i>${t[2]}</button>`).join('')).join('')+`<div class="who2"><span class="av">NO</span><div><b>Equipe NOC</b><small>Dados fictícios</small></div></div>`;
+ const P={dash:['Dashboard','Visão geral dos rompimentos da rede'],pend:['Pendências','Rompimentos abertos, em vermelho acima de 1 dia'],fin:['Finalizados','Rompimentos encerrados e validados'],mapa:['Trechos','Mapa esquemático e dono de cada trecho'],escala:['Escala','Plantão das 05h às 00h'],oc:['Ocorrências','Quantas vezes cada rota caiu, por mês'],novo:['Novo rompimento','Registro de uma nova ocorrência']};$('pt').textContent=P[st.view][0];$('ps').textContent=P[st.view][1];
+ document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{st.view=b.dataset.v;st.sel=null;render()});
+ $('app').innerHTML=({dash:vDash,pend:vPend,fin:vFin,mapa:vMapa,escala:vEscala,oc:vOc,novo:vNovo})[st.view]();bn();wire()}
+TRS=ld('t',seedTr);ESC=ld('e',seedEsc);load();setInterval(checkAlerts,6e4);
+const tick=()=>{$('upd').textContent=new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',weekday:'short',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'})+' · Brasília'};tick();setInterval(tick,1000);
+$('newb').onclick=()=>{st.view='novo';st.sel=null;render()};
+$('th').onclick=()=>{const d=document.documentElement,n=d.dataset.theme==='light'?'dark':'light';d.dataset.theme=n;try{localStorage.setItem('rompimentos-theme',n)}catch(e){}};
+$('reset').onclick=()=>{if(confirm('Voltar para os dados de exemplo?')){data=seed();save();TRS=seedTr();ESC=seedEsc();sv('t',TRS);sv('e',ESC);st.sel=null;render()}};
+render();
+</script>
+</body>
+</html>
